@@ -9,6 +9,7 @@ import PatientProfilePage from './pages/patient/PatientProfilePage.jsx'
 import DispensaryDetailsPage from './pages/patient/DispensaryDetailsPage.jsx'
 import ActiveQueuePage from './pages/patient/ActiveQueuePage.jsx'
 import DoctorDashboardPage from './pages/doctor/DoctorDashboardPage.jsx'
+import PatientLayout from './layouts/PatientLayout.jsx'
 
 function App() {
   return (
@@ -16,11 +17,13 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/patient/home" element={<PatientHomePage />} />
-        <Route path="/patient/map" element={<PatientMapPage />} />
-        <Route path="/patient/profile" element={<PatientProfilePage />} />
-        <Route path="/patient/dispensary/:id" element={<DispensaryDetailsPage />} />
-        <Route path="/patient/queue/:id" element={<ActiveQueuePage />} />
+        <Route path="/patient" element={<PatientLayout />}>
+          <Route path="home" element={<PatientHomePage />} />
+          <Route path="map" element={<PatientMapPage />} />
+          <Route path="profile" element={<PatientProfilePage />} />
+          <Route path="dispensary/:id" element={<DispensaryDetailsPage />} />
+          <Route path="queue/:id" element={<ActiveQueuePage />} />
+        </Route>
         <Route path="/doctor/dashboard" element={<DoctorDashboardPage />} />
       </Routes>
     </BrowserRouter>
