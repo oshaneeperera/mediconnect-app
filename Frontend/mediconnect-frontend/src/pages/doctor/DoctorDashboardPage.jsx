@@ -83,6 +83,9 @@ export default function DoctorDashboardPage() {
     <section className="doctor-dashboard">
       <header className="doctor-header">
         <div>
+          <button className="back-button" type="button" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
           <h2>{doctor?.name ?? 'Doctor'}</h2>
           <p>{dispensary?.address ?? 'Dispensary address not set'}</p>
         </div>

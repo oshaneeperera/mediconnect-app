@@ -87,6 +87,11 @@ public class QueueService {
 				.ifPresent(queueRepository::delete);
 	}
 
+	public Optional<QueueEntry> getActiveEntryForPatient(String patientId) {
+		List<QueueStatus> activeStatuses = List.of(QueueStatus.WAITING, QueueStatus.WITH_DOCTOR);
+		return queueRepository.findFirstByPatientIdAndStatusIn(patientId, activeStatuses);
+	}
+
 	public Optional<QueueEntry> callNextPatient(String dispensaryId) {
 		queueRepository.findFirstByDispensaryIdAndStatusOrderByTokenNumberAsc(dispensaryId, QueueStatus.WITH_DOCTOR)
 				.ifPresent(entry -> {

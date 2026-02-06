@@ -47,6 +47,13 @@ public class QueueController {
 		return queueService.getQueueStatus(dispensaryId);
 	}
 
+	@GetMapping("/patient/{patientId}")
+	public ResponseEntity<QueueEntry> getPatientQueue(@PathVariable String patientId) {
+		return queueService.getActiveEntryForPatient(patientId)
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
 	@GetMapping("/doctor/list/{dispensaryId}")
 	public DoctorQueueResponse getDoctorQueue(@PathVariable String dispensaryId) {
 		return queueService.getDoctorQueue(dispensaryId);

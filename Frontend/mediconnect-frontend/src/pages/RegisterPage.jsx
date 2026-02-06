@@ -47,6 +47,11 @@ export default function RegisterPage() {
     location: null,
     email: '',
     password: '',
+    facilities: {
+      xray: false,
+      ecg: false,
+      wheelchair: false,
+    },
   })
 
   const defaultCenter = [-1.286389, 36.817223]
@@ -84,7 +89,11 @@ export default function RegisterPage() {
               address: doctorForm.address,
               openingTime: '08:00',
               closingTime: '17:00',
-              facilities: ['X-ray', 'ECG', 'Wheelchair'],
+              facilities: [
+                doctorForm.facilities.xray ? 'X-ray' : null,
+                doctorForm.facilities.ecg ? 'ECG' : null,
+                doctorForm.facilities.wheelchair ? 'Wheelchair' : null,
+              ].filter(Boolean),
               availabilityStatus: 'AVAILABLE',
               location: {
                 type: 'Point',
@@ -279,6 +288,50 @@ export default function RegisterPage() {
                   }
                   required
                 />
+              </div>
+              <div className="form-field">
+                <label>Available Facilities</label>
+                <div className="facility-options">
+                  <label className="facility-option">
+                    <input
+                      type="checkbox"
+                      checked={doctorForm.facilities.xray}
+                      onChange={(event) =>
+                        setDoctorForm((prev) => ({
+                          ...prev,
+                          facilities: { ...prev.facilities, xray: event.target.checked },
+                        }))
+                      }
+                    />
+                    X-ray
+                  </label>
+                  <label className="facility-option">
+                    <input
+                      type="checkbox"
+                      checked={doctorForm.facilities.ecg}
+                      onChange={(event) =>
+                        setDoctorForm((prev) => ({
+                          ...prev,
+                          facilities: { ...prev.facilities, ecg: event.target.checked },
+                        }))
+                      }
+                    />
+                    ECG
+                  </label>
+                  <label className="facility-option">
+                    <input
+                      type="checkbox"
+                      checked={doctorForm.facilities.wheelchair}
+                      onChange={(event) =>
+                        setDoctorForm((prev) => ({
+                          ...prev,
+                          facilities: { ...prev.facilities, wheelchair: event.target.checked },
+                        }))
+                      }
+                    />
+                    Wheelchair
+                  </label>
+                </div>
               </div>
               <div className="form-field">
                 <label htmlFor="doctor-address">Address</label>

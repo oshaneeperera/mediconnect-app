@@ -1,40 +1,73 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-const queueData = {
-  currentServing: 5,
-  estimatedWait: '22 mins',
-  patients: [6, 7, 8, 9, 10, 11],
-}
 
 export default function ActiveQueuePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [assignedNumber, setAssignedNumber] = useState(null)
+  const [queueStats, setQueueStats] = useState(null)
+  const [anonymousPatients, setAnonymousPatients] = useState([])
+  const [patientId, setPatientId] = useState(null)
 
-  const assignedNumber = useMemo(() => {
-    const parsed = Number.parseInt(id ?? '0', 10)
-    return Number.isNaN(parsed) ? 12 : parsed + 11
+  useEffect(() => {
+    const email = localStorage.getItem('mc_user_email')
+    if (!email) return
+    fetch(`/api/users/by-email?email=${encodeURIComponent(email)}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data?.id) return
+        setPatientId(data.id)
+        return fetch(`/api/queue/patient/${data.id}`)
+      })
+      .then((response) => (response && response.ok ? response.json() : null))
+      .then((entry) => setAssignedNumber(entry?.tokenNumber ?? null))
+      .catch(() => setAssignedNumber(null))
+  }, [])
+
+  useEffect(() => {
+    if (!id) return
+    fetch(`/api/queue/status/${id}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        setQueueStats(data)
+        setAnonymousPatients(data?.anonymousPatients ?? [])
+      })
+      .catch(() => setQueueStats(null))
   }, [id])
 
   const handleLeaveQueue = () => {
-    navigate('/patient/home')
+    if (!patientId) {
+      navigate('/patient/home')
+      return
+    }
+    fetch('/api/queue/leave', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patientId }),
+    }).finally(() => navigate('/patient/home'))
   }
 
   return (
     <section className="queue-room">
       <div className="queue-card">
+        <button className="back-button" type="button" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
         <header>
           <h2>Your Queue Number</h2>
-          <p className="queue-number">#{assignedNumber}</p>
-          <p className="queue-status">Current Token Serving: #{queueData.currentServing}</p>
+          <p className="queue-number">{assignedNumber ? `#${assignedNumber}` : '-'}</p>
+          <p className="queue-status">
+            Current Token Serving:{' '}
+            {queueStats?.currentServingToken ? `#${queueStats.currentServingToken}` : '-'}
+          </p>
         </header>
 
         <div className="queue-section">
           <h3>People Ahead of You</h3>
           <ul className="queue-list">
-            {queueData.patients.map((patientNumber) => (
-              <li key={patientNumber}>
-                Patient #{patientNumber} - Waiting
+            {anonymousPatients.map((token) => (
+              <li key={token}>
+                {token} - Waiting
               </li>
             ))}
           </ul>
@@ -42,7 +75,11 @@ export default function ActiveQueuePage() {
 
         <div className="queue-section">
           <h3>Estimated Waiting Time</h3>
-          <p className="queue-wait">{queueData.estimatedWait}</p>
+          <p className="queue-wait">
+            {queueStats?.totalWaiting != null
+              ? `${queueStats.totalWaiting * 5} mins`
+              : '-'}
+          </p>
         </div>
 
         <button className="leave-queue-button" type="button" onClick={handleLeaveQueue}>

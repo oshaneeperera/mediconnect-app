@@ -25,6 +25,9 @@ export default function PatientProfilePage() {
   return (
     <section className="patient-profile">
       <div className="profile-card">
+        <button className="back-button" type="button" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
         <div className="profile-card__header">
           <img
             className="profile-avatar"

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -17,6 +17,7 @@ L.Icon.Default.mergeOptions({
 const defaultCenter = [5.6037, -0.187]
 
 export default function PatientMapPage() {
+  const navigate = useNavigate()
   const [dispensaries, setDispensaries] = useState([])
   const [center, setCenter] = useState(defaultCenter)
 
@@ -67,6 +68,9 @@ export default function PatientMapPage() {
     <section className="patient-map">
       <div className="patient-home__header">
         <div>
+          <button className="back-button" type="button" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
           <h2>Dispensaries Near You</h2>
           <p>Tap a marker to see details and open the dispensary page.</p>
         </div>
