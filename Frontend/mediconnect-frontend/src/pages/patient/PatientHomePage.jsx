@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useOutletContext } from 'react-router-dom'
 import dispensaryPlaceholder from '../../assets/dispensary-placeholder.svg'
 
 export default function PatientHomePage() {
   const [dispensaries, setDispensaries] = useState([])
+  const outletContext = useOutletContext()
+  const searchTerm = outletContext?.searchTerm ?? ''
 
   useEffect(() => {
     fetch('/api/dispensaries/with-wait')
@@ -11,6 +13,17 @@ export default function PatientHomePage() {
       .then((data) => setDispensaries(data))
       .catch(() => setDispensaries([]))
   }, [])
+
+  const filteredDispensaries = useMemo(() => {
+    const normalizedQuery = searchTerm.trim().toLowerCase()
+    if (!normalizedQuery) return dispensaries
+
+    return dispensaries.filter((entry) => {
+      const name = entry.dispensary?.name?.toLowerCase() ?? ''
+      const doctor = entry.dispensary?.doctorName?.toLowerCase() ?? ''
+      return name.includes(normalizedQuery) || doctor.includes(normalizedQuery)
+    })
+  }, [dispensaries, searchTerm])
 
   return (
     <section className="patient-home">
@@ -22,7 +35,7 @@ export default function PatientHomePage() {
       </div>
 
       <div className="dispensary-grid">
-        {dispensaries.map((entry) => (
+        {filteredDispensaries.map((entry) => (
           <Link
             key={entry.dispensary.id}
             to={`/patient/dispensary/${entry.dispensary.id}`}
@@ -57,6 +70,9 @@ export default function PatientHomePage() {
 
       {dispensaries.length === 0 && (
         <p className="empty-note">No dispensaries found yet.</p>
+      )}
+      {dispensaries.length > 0 && filteredDispensaries.length === 0 && (
+        <p className="empty-note">No matches for "{searchTerm}".</p>
       )}
     </section>
   )

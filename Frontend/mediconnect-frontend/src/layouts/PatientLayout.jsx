@@ -4,6 +4,7 @@ import defaultAvatar from '../assets/patient-avatar.svg'
 
 export default function PatientLayout() {
   const [user, setUser] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const email = localStorage.getItem('mc_user_email')
@@ -29,6 +30,8 @@ export default function PatientLayout() {
             type="search"
             placeholder="Search dispensaries or doctors"
             aria-label="Search dispensaries or doctors"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>
 
@@ -43,7 +46,7 @@ export default function PatientLayout() {
       </header>
 
       <main className="patient-content">
-        <Outlet />
+        <Outlet context={{ searchTerm }} />
       </main>
     </div>
   )
