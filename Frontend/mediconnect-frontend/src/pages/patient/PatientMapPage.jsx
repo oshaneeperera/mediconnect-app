@@ -1,51 +1,70 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
+const greenMarkerIcon = new L.Icon({
+  iconRetinaUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  iconUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
   shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
+
+const blueMarkerIcon = new L.Icon({
+  iconRetinaUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  iconUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 })
 
 const defaultCenter = [5.6037, -0.187]
+
+function RecenterMap({ center }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!center) return
+    map.setView(center, map.getZoom(), { animate: true })
+  }, [center, map])
+
+  return null
+}
 
 export default function PatientMapPage() {
   const navigate = useNavigate()
   const [dispensaries, setDispensaries] = useState([])
   const [center, setCenter] = useState(defaultCenter)
+  const [userLocation, setUserLocation] = useState(null)
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      fetch('/api/dispensaries')
-        .then((response) => (response.ok ? response.json() : []))
-        .then((data) => setDispensaries(data))
-        .catch(() => setDispensaries([]))
-      return
-    }
+    fetch('/api/dispensaries')
+      .then((response) => (response.ok ? response.json() : []))
+      .then((data) => setDispensaries(data))
+      .catch(() => setDispensaries([]))
+
+    if (!navigator.geolocation) return
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude
         const lon = position.coords.longitude
         setCenter([lat, lon])
-        fetch(`/api/dispensaries/nearby?lat=${lat}&lon=${lon}`)
-          .then((response) => (response.ok ? response.json() : []))
-          .then((data) => setDispensaries(data))
-          .catch(() => setDispensaries([]))
+        setUserLocation([lat, lon])
       },
-      () => {
-        fetch('/api/dispensaries')
-          .then((response) => (response.ok ? response.json() : []))
-          .then((data) => setDispensaries(data))
-          .catch(() => setDispensaries([]))
-      }
+      () => null
     )
   }, [])
 
@@ -78,12 +97,32 @@ export default function PatientMapPage() {
 
       <div className="map-card">
         <MapContainer center={center} zoom={13} className="patient-map__container">
+          <RecenterMap center={userLocation} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          {userLocation && (
+            <Marker position={userLocation} icon={blueMarkerIcon}>
+              <Tooltip direction="top" offset={[0, -24]} opacity={1} permanent>
+                You are here
+              </Tooltip>
+              <Popup>
+                <div className="map-popup">
+                  <p className="map-popup__title">Your Location</p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
           {markers.map((dispensary) => (
-            <Marker key={dispensary.id} position={dispensary.position}>
+            <Marker
+              key={dispensary.id}
+              position={dispensary.position}
+              icon={greenMarkerIcon}
+            >
+              <Tooltip direction="top" offset={[0, -24]} opacity={1} permanent>
+                {dispensary.name}
+              </Tooltip>
               <Popup>
                 <div className="map-popup">
                   <p className="map-popup__title">{dispensary.name}</p>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import dispensaryPlaceholder from '../../assets/dispensary-placeholder.svg'
 
@@ -13,9 +13,15 @@ export default function DispensaryDetailsPage() {
   const navigate = useNavigate()
   const [dispensary, setDispensary] = useState(null)
   const [queueStats, setQueueStats] = useState(null)
-  const [isInAnotherQueue, setIsInAnotherQueue] = useState(false)
+  const [activeQueueEntry, setActiveQueueEntry] = useState(null)
   const [userId, setUserId] = useState(null)
   const [joinError, setJoinError] = useState('')
+
+  const loadActiveQueueEntry = (patientId) =>
+    fetch(`/api/queue/patient/${patientId}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((entry) => setActiveQueueEntry(entry))
+      .catch(() => setActiveQueueEntry(null))
 
   useEffect(() => {
     if (!id) return
@@ -38,14 +44,14 @@ export default function DispensaryDetailsPage() {
       .then((data) => {
         if (!data?.id) return
         setUserId(data.id)
-        return fetch(`/api/queue/patient/${data.id}`)
+        return loadActiveQueueEntry(data.id)
       })
-      .then((response) => {
-        if (!response) return
-        setIsInAnotherQueue(response.ok)
-      })
-      .catch(() => setIsInAnotherQueue(false))
+      .catch(() => setActiveQueueEntry(null))
   }, [])
+
+  const isInQueue = Boolean(activeQueueEntry?.dispensaryId)
+  const isInThisDispensary = isInQueue && activeQueueEntry.dispensaryId === id
+  const isInAnotherQueue = isInQueue && !isInThisDispensary
 
   const handleJoinQueue = () => {
     if (isInAnotherQueue || !userId || !dispensary?.id) {
@@ -60,7 +66,9 @@ export default function DispensaryDetailsPage() {
     })
       .then((response) => {
         if (!response.ok) {
-          setIsInAnotherQueue(true)
+          if (userId) {
+            loadActiveQueueEntry(userId)
+          }
           setJoinError('You are already in another queue.')
           return
         }
@@ -130,14 +138,25 @@ export default function DispensaryDetailsPage() {
               </strong>
             </div>
           </div>
-          <button
-            className="primary-button join-queue-button"
-            type="button"
-            onClick={handleJoinQueue}
-            disabled={isInAnotherQueue}
-          >
-            Join Queue
-          </button>
+          {!isInThisDispensary && (
+            <button
+              className="primary-button join-queue-button"
+              type="button"
+              onClick={handleJoinQueue}
+              disabled={isInAnotherQueue}
+            >
+              Join Queue
+            </button>
+          )}
+          {isInThisDispensary && (
+            <button
+              className="primary-button join-queue-button"
+              type="button"
+              onClick={() => navigate(`/patient/queue/${dispensary.id}`)}
+            >
+              View Queue
+            </button>
+          )}
           {isInAnotherQueue && (
             <p className="queue-warning">You are already in another queue.</p>
           )}
