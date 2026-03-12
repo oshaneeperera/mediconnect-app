@@ -365,6 +365,11 @@
   background: #d1f4df;
 }
 
+.status-busy {
+  color: #7a5a15;
+  background: #fde7c3;
+}
+
 .status-closed {
   color: #7a2d2d;
   background: #f8d7da;

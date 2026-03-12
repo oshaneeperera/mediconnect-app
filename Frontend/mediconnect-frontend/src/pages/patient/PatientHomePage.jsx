@@ -53,10 +53,16 @@ export default function PatientHomePage() {
                   className={`status-pill ${
                     entry.dispensary.availabilityStatus === 'UNAVAILABLE'
                       ? 'status-closed'
+                      : entry.dispensary.availabilityStatus === 'BUSY'
+                      ? 'status-busy'
                       : 'status-open'
                   }`}
                 >
-                  {entry.dispensary.availabilityStatus === 'UNAVAILABLE' ? 'Closed' : 'Open'}
+                  {entry.dispensary.availabilityStatus === 'UNAVAILABLE'
+                    ? 'Unavailable'
+                    : entry.dispensary.availabilityStatus === 'BUSY'
+                    ? 'Busy'
+                    : 'Available'}
                 </span>
               </div>
               <p className="dispensary-card__doctor">{entry.dispensary.doctorName}</p>
