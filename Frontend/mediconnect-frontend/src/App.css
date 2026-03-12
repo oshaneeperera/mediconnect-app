@@ -340,6 +340,14 @@
   gap: 12px;
 }
 
+.dispensary-card__tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .dispensary-card__title h3 {
   margin: 0;
   font-size: 16px;
@@ -373,6 +381,11 @@
 .status-closed {
   color: #7a2d2d;
   background: #f8d7da;
+}
+
+.status-in-queue {
+  color: #1d4d7a;
+  background: #d8ebff;
 }
 
 .map-card {

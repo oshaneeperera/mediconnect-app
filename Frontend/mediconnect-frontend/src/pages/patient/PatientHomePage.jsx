@@ -4,6 +4,7 @@ import dispensaryPlaceholder from '../../assets/dispensary-placeholder.svg'
 
 export default function PatientHomePage() {
   const [dispensaries, setDispensaries] = useState([])
+  const [activeDispensaryId, setActiveDispensaryId] = useState(null)
   const outletContext = useOutletContext()
   const searchTerm = outletContext?.searchTerm ?? ''
 
@@ -12,6 +13,20 @@ export default function PatientHomePage() {
       .then((response) => (response.ok ? response.json() : []))
       .then((data) => setDispensaries(data))
       .catch(() => setDispensaries([]))
+  }, [])
+
+  useEffect(() => {
+    const email = localStorage.getItem('mc_user_email')
+    if (!email) return
+    fetch(`/api/users/by-email?email=${encodeURIComponent(email)}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data?.id) return
+        return fetch(`/api/queue/patient/${data.id}`)
+      })
+      .then((response) => (response && response.ok ? response.json() : null))
+      .then((entry) => setActiveDispensaryId(entry?.dispensaryId ?? null))
+      .catch(() => setActiveDispensaryId(null))
   }, [])
 
   const filteredDispensaries = useMemo(() => {
@@ -49,21 +64,26 @@ export default function PatientHomePage() {
             <div className="dispensary-card__body">
               <div className="dispensary-card__title">
                 <h3>{entry.dispensary.name}</h3>
-                <span
-                  className={`status-pill ${
-                    entry.dispensary.availabilityStatus === 'UNAVAILABLE'
-                      ? 'status-closed'
+                <div className="dispensary-card__tags">
+                  {activeDispensaryId === entry.dispensary.id && (
+                    <span className="status-pill status-in-queue">In Queue</span>
+                  )}
+                  <span
+                    className={`status-pill ${
+                      entry.dispensary.availabilityStatus === 'UNAVAILABLE'
+                        ? 'status-closed'
+                        : entry.dispensary.availabilityStatus === 'BUSY'
+                        ? 'status-busy'
+                        : 'status-open'
+                    }`}
+                  >
+                    {entry.dispensary.availabilityStatus === 'UNAVAILABLE'
+                      ? 'Unavailable'
                       : entry.dispensary.availabilityStatus === 'BUSY'
-                      ? 'status-busy'
-                      : 'status-open'
-                  }`}
-                >
-                  {entry.dispensary.availabilityStatus === 'UNAVAILABLE'
-                    ? 'Unavailable'
-                    : entry.dispensary.availabilityStatus === 'BUSY'
-                    ? 'Busy'
-                    : 'Available'}
-                </span>
+                      ? 'Busy'
+                      : 'Available'}
+                  </span>
+                </div>
               </div>
               <p className="dispensary-card__doctor">{entry.dispensary.doctorName}</p>
               <p className="dispensary-card__wait">
