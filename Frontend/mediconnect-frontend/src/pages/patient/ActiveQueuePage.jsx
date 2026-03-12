@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 export default function ActiveQueuePage() {
@@ -7,7 +7,6 @@ export default function ActiveQueuePage() {
   const [assignedNumber, setAssignedNumber] = useState(null)
   const [queueStats, setQueueStats] = useState(null)
   const [anonymousPatients, setAnonymousPatients] = useState([])
-  const [patientId, setPatientId] = useState(null)
 
   useEffect(() => {
     const email = localStorage.getItem('mc_user_email')
@@ -16,7 +15,6 @@ export default function ActiveQueuePage() {
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!data?.id) return
-        setPatientId(data.id)
         return fetch(`/api/queue/patient/${data.id}`)
       })
       .then((response) => (response && response.ok ? response.json() : null))
@@ -34,18 +32,6 @@ export default function ActiveQueuePage() {
       })
       .catch(() => setQueueStats(null))
   }, [id])
-
-  const handleLeaveQueue = () => {
-    if (!patientId) {
-      navigate('/patient/home')
-      return
-    }
-    fetch('/api/queue/leave', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ patientId }),
-    }).finally(() => navigate('/patient/home'))
-  }
 
   return (
     <section className="queue-room">
@@ -82,9 +68,6 @@ export default function ActiveQueuePage() {
           </p>
         </div>
 
-        <button className="leave-queue-button" type="button" onClick={handleLeaveQueue}>
-          Leave Queue
-        </button>
       </div>
     </section>
   )

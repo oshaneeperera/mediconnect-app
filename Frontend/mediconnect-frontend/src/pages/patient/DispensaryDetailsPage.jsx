@@ -77,6 +77,17 @@ export default function DispensaryDetailsPage() {
       .catch(() => setJoinError('Unable to join queue. Please try again.'))
   }
 
+  const handleLeaveQueue = () => {
+    if (!userId) return
+    fetch('/api/queue/leave', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patientId: userId }),
+    })
+      .then(() => setActiveQueueEntry(null))
+      .catch(() => null)
+  }
+
   return (
     <section className="dispensary-details">
       <button className="back-button" type="button" onClick={() => navigate(-1)}>
@@ -159,13 +170,22 @@ export default function DispensaryDetailsPage() {
             </button>
           )}
           {isInThisDispensary && (
-            <button
-              className="primary-button join-queue-button"
-              type="button"
-              onClick={() => navigate(`/patient/queue/${dispensary.id}`)}
-            >
-              View Queue
-            </button>
+            <>
+              <button
+                className="primary-button join-queue-button"
+                type="button"
+                onClick={() => navigate(`/patient/queue/${dispensary.id}`)}
+              >
+                View Queue
+              </button>
+              <button
+                className="leave-queue-button"
+                type="button"
+                onClick={handleLeaveQueue}
+              >
+                Leave Queue
+              </button>
+            </>
           )}
           {isInAnotherQueue && (
             <p className="queue-warning">You are already in another queue.</p>
