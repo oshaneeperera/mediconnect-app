@@ -50,6 +50,7 @@ export default function PatientMapPage() {
   const [dispensaries, setDispensaries] = useState([])
   const [center, setCenter] = useState(defaultCenter)
   const [userLocation, setUserLocation] = useState(null)
+  const [manualCenter, setManualCenter] = useState(null)
 
   useEffect(() => {
     fetch('/api/dispensaries')
@@ -69,6 +70,10 @@ export default function PatientMapPage() {
       () => null
     )
   }, [])
+
+  useEffect(() => {
+    setManualCenter(null)
+  }, [focusDispensaryId])
 
   const markers = useMemo(
     () =>
@@ -92,8 +97,8 @@ export default function PatientMapPage() {
     return null
   }, [focusDispensaryId, markers])
 
-  const focusCenter = focusTarget?.position ?? userLocation
-  const focusZoom = focusTarget ? 15 : null
+  const focusCenter = manualCenter ?? focusTarget?.position ?? userLocation
+  const focusZoom = manualCenter ? 13 : focusTarget ? 15 : null
 
   return (
     <section className="patient-map">
@@ -104,6 +109,16 @@ export default function PatientMapPage() {
           </button>
           <h2>Dispensaries Near You</h2>
           <p>Tap a marker to see details and open the dispensary page.</p>
+        </div>
+        <div className="patient-map__actions">
+          <button
+            className="secondary-button map-focus-button"
+            type="button"
+            onClick={() => userLocation && setManualCenter(userLocation)}
+            disabled={!userLocation}
+          >
+            Focus my location
+          </button>
         </div>
       </div>
 
