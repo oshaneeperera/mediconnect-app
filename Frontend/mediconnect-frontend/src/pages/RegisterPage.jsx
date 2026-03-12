@@ -86,6 +86,7 @@ export default function RegisterPage() {
             dispensary: {
               name: doctorForm.dispensaryName,
               doctorName: doctorForm.doctorName,
+              governmentHospital: doctorForm.hospital,
               address: doctorForm.address,
               openingTime: '08:00',
               closingTime: '17:00',

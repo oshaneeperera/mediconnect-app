@@ -13,6 +13,7 @@ public class Dispensary {
 	private String id;
 	private String name;
 	private String doctorName;
+	private String governmentHospital;
 	private String address;
 	private String imageUrl;
 	private List<String> facilities;

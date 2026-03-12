@@ -108,6 +108,7 @@ export default function DispensaryDetailsPage() {
             </button>
           </div>
           <p>{dispensary?.doctorName ?? 'Doctor'}</p>
+          <p>{dispensary?.governmentHospital ?? 'Government Hospital'}</p>
         </div>
       </div>
 
