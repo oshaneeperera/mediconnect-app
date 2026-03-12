@@ -150,14 +150,16 @@ export default function DispensaryDetailsPage() {
                 {queueStats?.currentServingToken ? `#${queueStats.currentServingToken}` : '-'}
               </strong>
             </div>
-            <div>
-              <span>Average Wait</span>
-              <strong>
-                {queueStats?.totalWaiting != null
-                  ? `${queueStats.totalWaiting * 5} mins`
-                  : '-'}
-              </strong>
-            </div>
+            {dispensary?.availabilityStatus !== 'UNAVAILABLE' && (
+              <div>
+                <span>Average Wait</span>
+                <strong>
+                  {queueStats?.totalWaiting != null
+                    ? `${queueStats.totalWaiting * 5} mins`
+                    : '-'}
+                </strong>
+              </div>
+            )}
           </div>
           {!isInThisDispensary && (
             <button

@@ -7,6 +7,7 @@ export default function ActiveQueuePage() {
   const [assignedNumber, setAssignedNumber] = useState(null)
   const [queueStats, setQueueStats] = useState(null)
   const [anonymousPatients, setAnonymousPatients] = useState([])
+  const [availabilityStatus, setAvailabilityStatus] = useState(null)
 
   useEffect(() => {
     const email = localStorage.getItem('mc_user_email')
@@ -31,6 +32,11 @@ export default function ActiveQueuePage() {
         setAnonymousPatients(data?.anonymousPatients ?? [])
       })
       .catch(() => setQueueStats(null))
+
+    fetch(`/api/dispensaries/${id}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setAvailabilityStatus(data?.availabilityStatus ?? null))
+      .catch(() => setAvailabilityStatus(null))
   }, [id])
 
   return (
@@ -59,14 +65,16 @@ export default function ActiveQueuePage() {
           </ul>
         </div>
 
-        <div className="queue-section">
-          <h3>Estimated Waiting Time</h3>
-          <p className="queue-wait">
-            {queueStats?.totalWaiting != null
-              ? `${queueStats.totalWaiting * 5} mins`
-              : '-'}
-          </p>
-        </div>
+        {availabilityStatus !== 'UNAVAILABLE' && (
+          <div className="queue-section">
+            <h3>Estimated Waiting Time</h3>
+            <p className="queue-wait">
+              {queueStats?.totalWaiting != null
+                ? `${queueStats.totalWaiting * 5} mins`
+                : '-'}
+            </p>
+          </div>
+        )}
 
       </div>
     </section>
