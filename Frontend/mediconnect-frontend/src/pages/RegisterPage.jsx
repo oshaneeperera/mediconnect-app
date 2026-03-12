@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet'
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -22,6 +22,17 @@ function LocationPicker({ value, onChange }) {
   })
 
   return value ? <Marker position={value} /> : null
+}
+
+function RecenterMap({ center, zoom }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!center) return
+    map.setView(center, zoom ?? map.getZoom(), { animate: true })
+  }, [center, map, zoom])
+
+  return null
 }
 
 export default function RegisterPage() {
@@ -55,6 +66,20 @@ export default function RegisterPage() {
   })
 
   const defaultCenter = [-1.286389, 36.817223]
+  const [mapCenter, setMapCenter] = useState(defaultCenter)
+  const [userLocation, setUserLocation] = useState(null)
+
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.latitude, position.coords.longitude]
+        setUserLocation(coords)
+        setMapCenter(coords)
+      },
+      () => null
+    )
+  }, [])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -352,10 +377,11 @@ export default function RegisterPage() {
                   <label>Dispensary Location (tap on map)</label>
                   <div className="map-picker">
                     <MapContainer
-                      center={doctorForm.location ?? defaultCenter}
+                      center={mapCenter}
                       zoom={13}
                       className="map-picker__container"
                     >
+                      <RecenterMap center={mapCenter} />
                       <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -373,6 +399,16 @@ export default function RegisterPage() {
                       ? `Selected: ${doctorForm.location[0].toFixed(5)}, ${doctorForm.location[1].toFixed(5)}`
                       : 'Click the map to drop a pin.'}
                   </p>
+                  <div className="map-picker__actions">
+                    <button
+                      className="secondary-button map-focus-button"
+                      type="button"
+                      onClick={() => userLocation && setMapCenter(userLocation)}
+                      disabled={!userLocation}
+                    >
+                      Focus my location
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="form-field">

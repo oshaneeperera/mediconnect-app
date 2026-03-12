@@ -172,6 +172,18 @@
   color: #4a6b5c;
 }
 
+.map-picker__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.map-focus-button {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
 .facility-options {
   display: flex;
   flex-wrap: wrap;
