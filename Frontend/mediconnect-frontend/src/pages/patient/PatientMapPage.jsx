@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MapContainer, Marker, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -32,19 +32,21 @@ const blueMarkerIcon = new L.Icon({
 
 const defaultCenter = [5.6037, -0.187]
 
-function RecenterMap({ center }) {
+function RecenterMap({ center, zoom }) {
   const map = useMap()
 
   useEffect(() => {
     if (!center) return
-    map.setView(center, map.getZoom(), { animate: true })
-  }, [center, map])
+    map.setView(center, zoom ?? map.getZoom(), { animate: true })
+  }, [center, map, zoom])
 
   return null
 }
 
 export default function PatientMapPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const focusDispensaryId = searchParams.get('dispensaryId')
   const [dispensaries, setDispensaries] = useState([])
   const [center, setCenter] = useState(defaultCenter)
   const [userLocation, setUserLocation] = useState(null)
@@ -83,6 +85,16 @@ export default function PatientMapPage() {
     [dispensaries]
   )
 
+  const focusTarget = useMemo(() => {
+    if (focusDispensaryId) {
+      return markers.find((marker) => marker.id === focusDispensaryId) || null
+    }
+    return null
+  }, [focusDispensaryId, markers])
+
+  const focusCenter = focusTarget?.position ?? userLocation
+  const focusZoom = focusTarget ? 15 : null
+
   return (
     <section className="patient-map">
       <div className="patient-home__header">
@@ -97,7 +109,7 @@ export default function PatientMapPage() {
 
       <div className="map-card">
         <MapContainer center={center} zoom={13} className="patient-map__container">
-          <RecenterMap center={userLocation} />
+          <RecenterMap center={focusCenter} zoom={focusZoom} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

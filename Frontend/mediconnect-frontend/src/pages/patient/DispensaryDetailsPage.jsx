@@ -85,7 +85,17 @@ export default function DispensaryDetailsPage() {
       <div className="details-header">
         <img src={dispensary?.imageUrl || dispensaryPlaceholder} alt={dispensary?.name} />
         <div>
-          <h2>{dispensary?.name ?? 'Dispensary'}</h2>
+          <div className="details-title-row">
+            <h2>{dispensary?.name ?? 'Dispensary'}</h2>
+            <button
+              className="secondary-button details-map-button"
+              type="button"
+              onClick={() => navigate(`/patient/map?dispensaryId=${dispensary?.id}`)}
+              disabled={!dispensary?.id}
+            >
+              View on Map
+            </button>
+          </div>
           <p>{dispensary?.doctorName ?? 'Doctor'}</p>
         </div>
       </div>

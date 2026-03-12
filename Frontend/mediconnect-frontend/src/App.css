@@ -515,6 +515,22 @@
   color: #0f3d2e;
 }
 
+.details-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.details-map-button {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #1e5bb8;
+  border-color: #1e5bb8;
+  color: #ffffff;
+}
+
 .details-header p {
   margin: 0;
   color: #4a6b5c;
